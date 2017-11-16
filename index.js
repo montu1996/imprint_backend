@@ -18,6 +18,13 @@ var client = new Twitter({
     access_token_secret: 'ShOYfYLUPs2XhBOOgemO7e3HGz3gtO7mucuWR4QRVI8Hw'
 });
 
+app.get('', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send({
+        msg: "Ohk"
+    });
+});
+
 app.post('/api/user_registration', urlencodedParser, (request, response) => {
     response.setHeader('Content-Type', 'application/json');
 
