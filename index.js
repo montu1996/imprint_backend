@@ -449,6 +449,310 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
     });
 });
 
+// Kush's API
+
+app.get('/api/scrape',function(req,resp){
+	// var options = {
+	// 	args: [req.query.name]
+	// };
+	// console.log(req.query.name);
+	// PythonShell.run('post.py',options, function (err, results) {
+	// // results is an array consisting of messages collected during execution 
+	// console.log('results: %j', results);
+	//  	getComments(req,resp);
+	// resp.send("Working on Comments!!");
+	  	
+	// 	});
+	Postscore(req,resp);
+});
+
+function getComments(req,resp){
+	var options = {
+			args: [req.query.name]
+	};
+	PythonShell.run('comment.py', options, function (err, results1) {
+	  	if (err) throw err;
+	  	// results is an array consisting of messages collected during execution 
+	  	console.log('results1: %j', results1);	
+	});
+	Postscore(req,resp);
+	resp.send("Working on Postscore!!");
+}
+function Postscore(req,resp){
+	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+		if(err){
+			return console.log('Unable to connect Monogdb Server');
+		}
+		db.collection("FacebookComment").find({'Name':req.query.name}).toArray().then((results)=>{
+		postids = results;
+	    update(postids);
+	   	},(err)=>{
+	   		console.log(err);
+	   	})
+	  
+	});
+}
+function update(avg){
+	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+		if(err){
+				return console.log('Unable to connect Monogdb Server');
+				}
+	   	for(i=0;i<avg.length;i++){
+	   		u1(avg[i].PostID);
+	   	}
+		db.close();
+		});	
+}
+function u1(results){
+	var k1 = results;
+	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+	if(err){
+		return console.log('Unable to connect Monogdb Server');
+	}
+	   									
+	db.collection('FacebookComment').find({'PostID':results}).toArray().then((results)=>{
+	sum=0
+	for(i=0;i<results.length;i++){
+	sum=sum+results[i].Commentscores
+	}
+	global.avg = sum/results.length;
+	console.log(avg);
+	},(err)=>{
+		console.log(err);
+	});
+	db.close();
+	});	
+	updated(k1,avg);
+}
+function updated(k1,avg){
+	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+	if(err){
+	return console.log('Unable to connect Monogdb Server');
+	}
+	db.collection('FacebookPost').findOneAndUpdate({
+	'PostID' : k1
+	},{
+	$set : {
+	'Postscores' : avg
+	}
+	}).then((results1)=>{
+	console.log(results1);
+	});
+	db.close();
+	});	
+}
+function postcategorize(){
+	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+	if(err){
+	return console.log('Unable to connect Monogdb Server');
+	}
+     var r1 = db.collection('FacebookPost').aggregate([{$group : { _id : '$Postscores',count : { $sum :1}}}])
+     r1.toArray.then((results)=>{
+     	console.log(results);
+     },(err)=>{
+     	console.log(err);
+     })
+   });
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//API which gives number of post per sentiment.. Pass the page's username and it will return a json responce with
+//an array of 5 element.. 
+app.get('/api/getGroupWiseScores',function(req,resp){
+	groupscores(req.query.name,req,resp);
+});
+
+function groupscores(Name,req,resp){
+    
+    MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+            if(err){
+                resp.send({
+                    status_code: 500,
+                    data: {
+                        msg: "can't connect to the mongodb"
+                    }
+                });
+            }
+            console.log('Connected to server');
+            if(Name == undefined)
+            {
+                resp.send({
+                status_code: 400,
+                data: {
+                    msg: "Field Missing"
+                }
+                });
+            }
+            var r1 = db.collection('FacebookPost').aggregate([{$match : { 'Name' : Name}},{$group : { _id : '$Postscores',count : {$sum : 1}}}]);
+            r1.toArray().then((results)=>{
+                resp.send({
+                                status_code: 200,
+                                data: {
+                                    "msg":results
+                                }
+                            });
+            },(err)=>{
+                resp.send({
+                                status_code: 404,
+                                data: {
+                                    msg: "Data Not Found"
+                                }
+                            });
+            })
+            db.close();
+        });
+}
+    
+//API which gives post and its score date wise in decending.. means latest post first.
+//Input Username of FB page..
+app.get('/api/getDateWiseScores',function(req,resp){
+    Descending(req.query.name,req,resp);
+});
+
+function Descending(Name,req,resp){
+    
+    MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+            if(err){
+                resp.send({
+                    status_code: 500,
+                    data: {
+                        msg: "can't connect to the mongodb"
+                    }
+                });
+            }
+            if(Name == undefined)
+            {
+                resp.send({
+                status_code: 400,
+                data: {
+                    msg: "Field Missing"
+                }
+                });
+            }
+            console.log('Connected to server');
+            db.collection('FacebookPost').find({'Name':Name},{'Message' : 1 , 'PostCreationTime' : 1 , 'Postscores' : 1}).sort({'PostCreationTime' : -1}).toArray(function (err,results){
+                if(err){
+                    db.close();
+                    resp.send({
+                                status_code: 404,
+                                data: {
+                                    msg: "Data Not Found"
+                                }
+                            });
+                }
+                else
+                {
+                    console.log(results);
+                      db.close();
+                      resp.send({
+                                status_code: 200,
+                                data: {
+                                    "msg":results
+                                }
+                            });
+                }
+            })
+        });
+}
+
+    //API which returns Possitive comments array whoes sentiment value is grater then 2. 
+//Input Username of FB page..
+app.get('/api/getPossitiveComments',function(req,resp){
+	Possitive(req.query.name,req,resp);
+});
+
+function Possitive(Name,req,resp){
+	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+		if(err){
+				resp.send({
+                status_code: 500,
+                data: {
+                    msg: "can't connect to the mongodb"
+                }
+            	});
+		}
+		if(Name == undefined)
+		{
+			resp.send({
+            status_code: 400,
+            data: {
+                msg: "Field Missing"
+            }
+        	});
+		}
+		db.collection('FacebookComment').find({'Name':Name , 'Commentscores' : { $gt : 2}},{'CommentMessage' : 1}).toArray(function (err,results){
+			if(err){
+				db.close();
+				resp.send({
+				status_code: 404,
+                data: {
+                msg: "Data Not Found"
+                }
+                });
+			}
+			else
+			{
+				db.close();		
+				resp.send({
+				status_code: 200,
+				data: {
+					"msg" : results
+				}
+                });
+			}
+		})
+   });
+}
+
+//API which returns Negative comments array whoes sentiment value is lesser then 2. 
+//Input Username of FB page..
+app.get('/api/getNegativeComments',function(req,resp){
+	Negative(req.query.name,req,resp);
+});
+
+function Negative(Name,req,resp){
+	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+		if(err){
+			resp.send({
+                status_code: 500,
+                data: {
+                    msg: "can't connect to the mongodb"
+                }
+            });
+		}
+		if(Name ==  undefined)
+		{
+			resp.send({
+            status_code: 400,
+            data: {
+                msg: "Field Missing"
+            }
+        });
+		}
+		db.collection('FacebookComment').find({'Name':Name , 'Commentscores' : { $lt : 2}},{'CommentMessage' : 1}).toArray(function (err,results){
+			if(err){
+				db.close();
+				resp.send({
+                            status_code: 404,
+                            data: {
+                                msg: "Login Data Not Founds"
+                            }
+                        });
+			}
+			else
+			{
+				db.close();		
+				resp.send({
+                            status_code: 200,
+                            data: {
+                                "msg":results
+                            }
+                        });
+			}
+		})
+   });
+}
+
 app.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
 });
