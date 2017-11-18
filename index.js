@@ -634,124 +634,123 @@ function Descending(Name,req,resp){
                 if(err){
                     db.close();
                     resp.send({
-                                status_code: 404,
-                                data: {
-                                    msg: "Data Not Found"
-                                }
-                            });
+                        status_code: 404,
+                        data: {
+                            msg: "Data Not Found"
+                        }
+                    });
                 }
                 else
                 {
-                    console.log(results);
-                      db.close();
-                      resp.send({
-                                status_code: 200,
-                                data: {
-                                    "msg":results
-                                }
-                            });
+                    db.close();
+                    resp.send({
+                        status_code: 200,
+                        data: {
+                            msg:results
+                        }
+                    });
                 }
             })
         });
 }
 
-    //API which returns Possitive comments array whoes sentiment value is grater then 2. 
-//Input Username of FB page..
-app.get('/api/getPossitiveComments',function(req,resp){
-	Possitive(req.query.name,req,resp);
-});
+//  //API which returns Possitive comments array whoes sentiment value is grater then 2. 
+// //Input Username of FB page..
+// app.get('/api/getPossitiveComments',function(req,resp){
+// 	Possitive(req.query.name,req,resp);
+// });
 
-function Possitive(Name,req,resp){
-	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
-		if(err){
-				resp.send({
-                status_code: 500,
-                data: {
-                    msg: "can't connect to the mongodb"
-                }
-            	});
-		}
-		if(Name == undefined)
-		{
-			resp.send({
-            status_code: 400,
-            data: {
-                msg: "Field Missing"
-            }
-        	});
-		}
-		db.collection('FacebookComment').find({'Name':Name , 'Commentscores' : { $gt : 2}},{'CommentMessage' : 1}).toArray(function (err,results){
-			if(err){
-				db.close();
-				resp.send({
-				status_code: 404,
-                data: {
-                msg: "Data Not Found"
-                }
-                });
-			}
-			else
-			{
-				db.close();		
-				resp.send({
-				status_code: 200,
-				data: {
-					"msg" : results
-				}
-                });
-			}
-		})
-   });
-}
+// function Possitive(Name,req,resp){
+// 	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+// 		if(err){
+// 				resp.send({
+//                 status_code: 500,
+//                 data: {
+//                     msg: "can't connect to the mongodb"
+//                 }
+//             	});
+// 		}
+// 		if(Name == undefined)
+// 		{
+// 			resp.send({
+//             status_code: 400,
+//             data: {
+//                 msg: "Field Missing"
+//             }
+//         	});
+// 		}
+// 		db.collection('FacebookComment').find({'Name':Name , 'Commentscores' : { $gt : 2}},{'CommentMessage' : 1}).toArray(function (err,results){
+// 			if(err){
+// 				db.close();
+// 				resp.send({
+// 				status_code: 404,
+//                 data: {
+//                 msg: "Data Not Found"
+//                 }
+//                 });
+// 			}
+// 			else
+// 			{
+// 				db.close();		
+// 				resp.send({
+// 				status_code: 200,
+// 				data: {
+// 					"msg" : results
+// 				}
+//                 });
+// 			}
+// 		})
+//    });
+// }
 
-//API which returns Negative comments array whoes sentiment value is lesser then 2. 
-//Input Username of FB page..
-app.get('/api/getNegativeComments',function(req,resp){
-	Negative(req.query.name,req,resp);
-});
+// //API which returns Negative comments array whoes sentiment value is lesser then 2. 
+// //Input Username of FB page..
+// app.get('/api/getNegativeComments',function(req,resp){
+// 	Negative(req.query.name,req,resp);
+// });
 
-function Negative(Name,req,resp){
-	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
-		if(err){
-			resp.send({
-                status_code: 500,
-                data: {
-                    msg: "can't connect to the mongodb"
-                }
-            });
-		}
-		if(Name ==  undefined)
-		{
-			resp.send({
-            status_code: 400,
-            data: {
-                msg: "Field Missing"
-            }
-        });
-		}
-		db.collection('FacebookComment').find({'Name':Name , 'Commentscores' : { $lt : 2}},{'CommentMessage' : 1}).toArray(function (err,results){
-			if(err){
-				db.close();
-				resp.send({
-                            status_code: 404,
-                            data: {
-                                msg: "Login Data Not Founds"
-                            }
-                        });
-			}
-			else
-			{
-				db.close();		
-				resp.send({
-                            status_code: 200,
-                            data: {
-                                "msg":results
-                            }
-                        });
-			}
-		})
-   });
-}
+// function Negative(Name,req,resp){
+// 	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+// 		if(err){
+// 			resp.send({
+//                 status_code: 500,
+//                 data: {
+//                     msg: "can't connect to the mongodb"
+//                 }
+//             });
+// 		}
+// 		if(Name ==  undefined)
+// 		{
+// 			resp.send({
+//             status_code: 400,
+//             data: {
+//                 msg: "Field Missing"
+//             }
+//         });
+// 		}
+// 		db.collection('FacebookComment').find({'Name':Name , 'Commentscores' : { $lt : 2}},{'CommentMessage' : 1}).toArray(function (err,results){
+// 			if(err){
+// 				db.close();
+// 				resp.send({
+//                             status_code: 404,
+//                             data: {
+//                                 msg: "Login Data Not Founds"
+//                             }
+//                         });
+// 			}
+// 			else
+// 			{
+// 				db.close();		
+// 				resp.send({
+//                             status_code: 200,
+//                             data: {
+//                                 "msg":results
+//                             }
+//                         });
+// 			}
+// 		})
+//    });
+// }
 
 app.listen(app.get('port'), function () {
     console.log('Node app is running on port', app.get('port'));
