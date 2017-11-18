@@ -606,53 +606,49 @@ function groupscores(Name,req,resp){
 //API which gives post and its score date wise in decending.. means latest post first.
 //Input Username of FB page..
 app.get('/api/getDateWiseScores',function(req,resp){
-    Descending(req.query.name,req,resp);
-});
-
-function Descending(Name,req,resp){
-    
+    var Name = req.query.name;
     MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+        if(err){
+            resp.send({
+                status_code: 500,
+                data: {
+                    msg: "can't connect to the mongodb"
+                }
+            });
+        }
+        if(Name == undefined)
+        {
+            resp.send({
+            status_code: 400,
+            data: {
+                msg: "Field Missing"
+            }
+            });
+        }
+        console.log('Connected to server');
+        db.collection('FacebookPost').find({'Name':Name},{'Message' : 1 , 'PostCreationTime' : 1 , 'Postscores' : 1}).sort({'PostCreationTime' : -1}).toArray(function (err,results){
             if(err){
+                db.close();
                 resp.send({
-                    status_code: 500,
+                    status_code: 404,
                     data: {
-                        msg: "can't connect to the mongodb"
+                        msg: "Data Not Found"
                     }
                 });
             }
-            if(Name == undefined)
+            else
             {
+                db.close();
                 resp.send({
-                status_code: 400,
-                data: {
-                    msg: "Field Missing"
-                }
+                    status_code: 200,
+                    data: {
+                        msg:results
+                    }
                 });
             }
-            console.log('Connected to server');
-            db.collection('FacebookPost').find({'Name':Name},{'Message' : 1 , 'PostCreationTime' : 1 , 'Postscores' : 1}).sort({'PostCreationTime' : -1}).toArray(function (err,results){
-                if(err){
-                    db.close();
-                    resp.send({
-                        status_code: 404,
-                        data: {
-                            msg: "Data Not Found"
-                        }
-                    });
-                }
-                else
-                {
-                    db.close();
-                    resp.send({
-                        status_code: 200,
-                        data: {
-                            msg:results
-                        }
-                    });
-                }
-            })
-        });
-}
+        })
+    });
+});
 
 //  //API which returns Possitive comments array whoes sentiment value is grater then 2. 
 // //Input Username of FB page..
