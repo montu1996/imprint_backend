@@ -790,7 +790,7 @@ function Twitter1(Name,req,resp){
         });
         return;
 		}
-		db.collection('SumTwitter').find({'Name':'Kush'}).toArray().then((results)=>{
+		db.collection('SumTwitter').find({'Name':Name}).toArray().then((results)=>{
 			if(err){
 				//db.close();
 				resp.send({
