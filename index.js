@@ -328,14 +328,14 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                                 for(var i in tweets) {
                                     var obj = {
                                         Postid: tweets[i].id,
-                                        Description: tweets[i].text,
-                                        Createdtime: tweets[i].created_at,
+                                        Message: tweets[i].text,
+                                        PostCreationTime: tweets[i].created_at,
                                         like: tweets[i].favorite_count,
                                         retweetCount: tweets[i].retweet_count,
-                                        popularityScore: 0
+                                        Postscores: 0
                                     };
                                     var ans = (obj.retweetCount * 1.5) + obj.like;
-                                    obj.popularityScore = ans;
+                                    obj.Postscores = ans;
                                     user[0].Post.push(obj);
                                 }
                                 db.collection('TwitterData').findOneAndUpdate({_id: user[0]._id}, {
@@ -367,14 +367,14 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                         for(var i in tweets) {
                             var obj = {
                                 Postid: tweets[i].id,
-                                Description: tweets[i].text,
-                                Createdtime: tweets[i].created_at,
+                                Message: tweets[i].text,
+                                PostCreationTime: tweets[i].created_at,
                                 like: tweets[i].favorite_count,
                                 retweetCount: tweets[i].retweet_count,
-                                popularityScore: 0
+                                Postscores: 0
                             };
                             var ans = (obj.retweetCount * 1.5) + obj.like;
-                            obj.popularityScore = ans;
+                            obj.Postscores = ans;
                             user[0].Post.push(obj);
                         }
                         getTweets();
@@ -811,10 +811,11 @@ function Twitter1(Name,req,resp){
 			}
 			else
 			{	
+                console.log(results);
 				resp.send({
                             status_code: 200,
                             data: {
-                                "msg":results
+                                "msg" : results[0].data.msg
                             }
                         });
                         return;
