@@ -572,6 +572,7 @@ function groupscores(Name,req,resp){
                         msg: "can't connect to the mongodb"
                     }
                 });
+                return;
             }
             console.log('Connected to server');
             if(Name == undefined)
@@ -582,6 +583,7 @@ function groupscores(Name,req,resp){
                     msg: "Field Missing"
                 }
                 });
+                return;
             }
             var r1 = db.collection('FacebookPost').aggregate([{$match : { 'Name' : Name}},{$group : { _id : '$Postscores',count : {$sum : 1}}}]);
             r1.toArray().then((results)=>{
@@ -591,6 +593,7 @@ function groupscores(Name,req,resp){
                                     "msg":results
                                 }
                             });
+                            return;
             },(err)=>{
                 resp.send({
                                 status_code: 404,
@@ -598,6 +601,7 @@ function groupscores(Name,req,resp){
                                     msg: "Data Not Found"
                                 }
                             });
+                            return;
             })
             db.close();
         });
@@ -615,6 +619,7 @@ app.get('/api/getDateWiseScores',function(req,resp){
                     msg: "can't connect to the mongodb"
                 }
             });
+            return;
         }
         if(Name == undefined)
         {
@@ -624,6 +629,7 @@ app.get('/api/getDateWiseScores',function(req,resp){
                 msg: "Field Missing"
             }
             });
+            return;
         }
         console.log('Connected to server');
         db.collection('FacebookPost').find({'Name':Name},{'Message' : 1 , 'PostCreationTime' : 1 , 'Postscores' : 1}).sort({'PostCreationTime' : -1}).toArray(function (err,results){
@@ -635,6 +641,7 @@ app.get('/api/getDateWiseScores',function(req,resp){
                         msg: "Data Not Found"
                     }
                 });
+                return;
             }
             else
             {
@@ -645,6 +652,7 @@ app.get('/api/getDateWiseScores',function(req,resp){
                         msg:results
                     }
                 });
+                return;
             }
         })
     });
@@ -664,7 +672,8 @@ function Possitive(Name,req,resp){
                 data: {
                     msg: "can't connect to the mongodb"
                 }
-            	});
+                });
+                return;
 		}
 		if(Name == undefined)
 		{
@@ -673,7 +682,8 @@ function Possitive(Name,req,resp){
             data: {
                 msg: "Field Missing"
             }
-        	});
+            });
+            return;
 		}
 		db.collection('FacebookComment').find({'Name':Name , 'Commentscores' : { $gt : 2}},{'CommentMessage' : 1}).toArray(function (err,results){
 			if(err){
@@ -684,6 +694,7 @@ function Possitive(Name,req,resp){
                 msg: "Data Not Found"
                 }
                 });
+                return;
 			}
 			else
 			{
@@ -694,6 +705,7 @@ function Possitive(Name,req,resp){
 					"msg" : results
 				}
                 });
+                return;
 			}
 		})
    });
@@ -714,6 +726,7 @@ function Negative(Name,req,resp){
                     msg: "can't connect to the mongodb"
                 }
             });
+            return;
 		}
 		if(Name ==  undefined)
 		{
@@ -723,6 +736,7 @@ function Negative(Name,req,resp){
                 msg: "Field Missing"
             }
         });
+        return;
 		}
 		db.collection('FacebookComment').find({'Name':Name , 'Commentscores' : { $lt : 2}},{'CommentMessage' : 1}).toArray(function (err,results){
 			if(err){
@@ -733,6 +747,7 @@ function Negative(Name,req,resp){
                                 msg: "Login Data Not Founds"
                             }
                         });
+                        return;
 			}
 			else
 			{
@@ -743,9 +758,63 @@ function Negative(Name,req,resp){
                                 "msg":results
                             }
                         });
+                        return;
 			}
 		})
    });
+}
+
+app.get('/api/getTweetsData',function(req,resp){
+	Twitter1(req.query.name,req,resp);
+});
+
+
+function Twitter1(Name,req,resp){
+	MongoClient.connect('mongodb://imprint:montu123@ds127065.mlab.com:27065/imprint',(err,db)=>{
+		if(err){
+			resp.send({
+                status_code: 500,
+                data: {
+                    msg: "can't connect to the mongodb"
+                }
+            });
+            return;
+		}
+		if(Name ==  undefined)
+		{
+			resp.send({
+            status_code: 400,
+            data: {
+                msg: "Field Missing"
+            }
+        });
+        return;
+		}
+		db.collection('SumTwitter').find({'Name':'Kush'}).toArray().then((results)=>{
+			if(err){
+				//db.close();
+				resp.send({
+                            status_code: 404,
+                            data: {
+                                msg: "Data Not Found"
+                            }
+                        });
+                        return;
+			}
+			else
+			{	
+				resp.send({
+                            status_code: 200,
+                            data: {
+                                "msg":results
+                            }
+                        });
+                        return;
+			}
+        });
+        db.close();	
+   });
+   return;
 }
 
 app.listen(app.get('port'), function () {
