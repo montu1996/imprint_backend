@@ -19,11 +19,11 @@ it('should return status_code:200 while data found => getTweetsData', (done)=> {
     });
 })
 
-it('should return status_code:200 and msg will be empty  while data not found => getPossitiveComments', (done)=> {
+it('should return status_code:404 and msg will be empty  while data not found => getTweetsData', (done)=> {
     request.get('http://localhost:5000/api/getTweetsData?name=abcd', function (error, response, body) {
         var json = JSON.parse(body);
         var status_code = json.status_code;
-        expect(status_code).toBe(200);
+        expect(status_code).toBe(404);
         done();
     });
 })

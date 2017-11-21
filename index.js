@@ -706,13 +706,23 @@ function Possitive(Name,req,resp){
 			}
 			else
 			{
-				db.close();		
-				resp.send({
-				status_code: 200,
-				data: {
-					"msg" : results
-				}
-                });
+                db.close();		
+                if( results.length == 0 ) {
+                    resp.send({
+                        status_code: 404,
+                        data: {
+                            "msg" : "No Data Found"
+                        }
+                        });
+                }
+                else {
+                    resp.send({
+                        status_code: 200,
+                        data: {
+                            "msg" : results
+                        }
+                        });
+                }
                 return;
 			}
 		})
@@ -811,14 +821,25 @@ function Twitter1(Name,req,resp){
 			}
 			else
 			{	
-                console.log(results);
-				resp.send({
-                            status_code: 200,
-                            data: {
-                                "msg" : results[0].data.msg
-                            }
-                        });
-                        return;
+                // console.log("O : " + results[0]);
+                if( results.length == 0 ) {
+                    resp.send({
+                        status_code: 404,
+                        data: {
+                            "msg" : "No Data Found"
+                        }
+                    });
+                }
+                else {
+                    resp.send({
+                        status_code: 200,
+                        data: {
+                            "msg" : results[0].data.msg
+                        }
+                    });
+                }
+                // console.log(results.length == 0);
+                return;
 			}
         });
         db.close();	
