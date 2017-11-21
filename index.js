@@ -302,6 +302,7 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                 msg: "Field Missing"
             }
         });
+        return;
     }
 
     MongoClient.connect(url, function (err, db) {
@@ -356,6 +357,7 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                                     status_code: 200,
                                     data: user[0]
                                 });
+                                
                             }
                             return;
                         }
@@ -386,6 +388,7 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                         msg: "Internal Server Error!!"
                     }
                 });
+                return;
             });
         }
 
@@ -396,6 +399,7 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                     msg: "can't connect to the mongodb"
                 }
             });
+            return;
         }
 
         // screenName = screenName.toLowerCase();
@@ -408,13 +412,15 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
             else {
                 var params = {screen_name: screenName};
                 client.get('users/show', params, function(error, user, res) {
-                    if(user.errors[0].code === 50) {
+                    console.log(user);
+                    if( user.errors ) {
                         response.send({
                             status_code: 400,
                             data: {
                                 msg: user.errors[0].message
                             }
                         });
+                        return;
                     }
                     var userObj = {
                         User_ID: user.id,
@@ -434,6 +440,7 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                                 msg: "Internal Server Error!!"
                             }
                         });
+                        return;
                     });
                 });
             }
@@ -444,6 +451,7 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                     msg: "Error in find mongod"
                 }
             });
+            return;
         });
         
     });
