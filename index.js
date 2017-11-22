@@ -821,13 +821,12 @@ function Twitter1(Name,req,resp){
                         return;
 			}
 			else
-			{	
-                // console.log("O : " + results[0]);
+			{
                 if( results.length == 0 ) {
                     resp.send({
                         status_code: 404,
                         data: {
-                            "msg" : "No Data Found"
+                            msg : "No Data Found"
                         }
                     });
                 }
@@ -835,7 +834,7 @@ function Twitter1(Name,req,resp){
                     resp.send({
                         status_code: 200,
                         data: {
-                            "msg" : results[0].data.msg
+                            msg : results[0]
                         }
                     });
                 }
