@@ -822,7 +822,7 @@ function Twitter1(Name,req,resp){
 			}
 			else
 			{
-                if( results.length == 0 ) {
+                if( results == undefined || results.length == 0 ) {
                     resp.send({
                         status_code: 404,
                         data: {
@@ -834,11 +834,10 @@ function Twitter1(Name,req,resp){
                     resp.send({
                         status_code: 200,
                         data: {
-                            msg : results[0]
+                            msg : results[0].msg
                         }
                     });
                 }
-                // console.log(results.length == 0);
                 return;
 			}
         });
