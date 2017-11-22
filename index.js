@@ -350,6 +350,7 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                                         status_code: 200,
                                         data: user[0]
                                     });
+                                    return;
                                 });
                             }
                             else {
@@ -357,7 +358,7 @@ app.post('/api/getTweets', urlencodedParser, (request, response) => {
                                     status_code: 200,
                                     data: user[0]
                                 });
-                                
+                                return;
                             }
                             return;
                         }
